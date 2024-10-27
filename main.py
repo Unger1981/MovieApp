@@ -6,15 +6,24 @@ import matplotlib.pyplot as plt
 from fuzzywuzzy import fuzz
 import json
 import os
-from movie_handling.movie_storage import get_movies,add_movie,delete_movie,update_movie, save_movies
+from movie_handling.movie_storage import get_movies, add_movie, delete_movie, update_movie, save_movies
+
 
 def main():
+    """
+    The main function of the program.
+    This function calls the print_menu function to display the menu,
+    and then calls the menu_user_input function to handle user input
+    based on their menu choice.
+    """
     print_menu()
     menu_user_input()
-    return
+
 
 def print_menu():
-    ###function printing basic menu, void###
+    """
+    Prints the main menu to the console.
+    """
     print()
     print("********** My Movies Database **********")
     print()
@@ -28,57 +37,64 @@ def print_menu():
     print("6. Random movie")
     print("7. Search movie")
     print("8. Movies sorted by rating")
-    print("9. Create Rating Histogram")
+    print("9. Movies sorted by year")
+    print("10. Create Rating Histogram")
+
 
 def menu_user_input():
-    ###function for user input control to call function by user input, void ###
+    """
+    Handles user input for the main menu and calls the appropriate function based on the user's choice.
+    """
     while True:
         try:
             print()
-            user_choice = input("Enter choice (0-9) ")
-            print() 
+            user_choice = int(input("Enter choice (0-9) "))
+            print()
             break
         except ValueError as e:
             print(f"Invalid Input. Error {e}")
-    if user_choice == "1":
+    if user_choice == 1:
         list_movies()
-    elif user_choice == "2":
+    elif user_choice == 2:
         add_movie_input()
-    elif user_choice == "3":
+    elif user_choice == 3:
         del_movie()
-    elif user_choice == "4":
-        upd_movie()     
-    elif user_choice == "5":
+    elif user_choice == 4:
+        upd_movie()
+    elif user_choice == 5:
         stats()
-    elif user_choice == "6":
-        random_movies()   
-    elif user_choice == "7":
+    elif user_choice == 6:
+        random_movies()
+    elif user_choice == 7:
         search_movies()
-    elif user_choice == "8":
+    elif user_choice == 8:
         movies_sorted_rating()
-    elif user_choice == "9":
+    elif user_choice == 9:
+        movies_sorted_year()
+    elif user_choice == 10:
         rating_histo()
-    elif user_choice == "0":
-            print("Bye!")
-            return  
+    elif user_choice == 0:
+        print("Bye!")
+        return
     else:
-            print("***Invalid input. Please choose a number between 0 and 9.***")
-            print_menu()
-            menu_user_input()
-    print_menu()
-    menu_user_input()    
+        print("***Invalid input. Please choose a number between 0 and 9.***")
+        print_menu()
+        menu_user_input()
+
 
 def list_movies():
-    ###function print a list of all movies by loading from json and printing, void###
+    """
+    Prints a list of all movies stored in the database.
+    """
     print("List of movies in database")
     print("**************************")
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         print_menu()
-        menu_user_input() 
-        return   1
+        menu_user_input()
+        return 1
     for index, (key, movie) in enumerate(movies.items()):
         title = movie.get("title", "Unknown Title")
         rating = movie.get("rating", "No Rating")
@@ -86,20 +102,23 @@ def list_movies():
         print(f"{index + 1}. {title} (Rating: {rating}), Year: {year_of_release}")
     print_menu()
     menu_user_input()
-    
+
+
 def add_movie_input():
-### Adding movie wit title raanking year_of_release to movies and storing to movies.json by using add_movie function0###
+    """
+    Prompts the user to enter details for a new movie and adds it to the database.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
     while True:
         try:
-            movie_add_by_user = input(" Please enter the movie title you want to enter ")
-            ranking_add_by_user = float(input("Pleae enter Ranking (Float 1-10) ")  )
+            movie_add_by_user = input("Please enter the movie title you want to enter ")
+            ranking_add_by_user = float(input("Please enter Ranking (Float 1-10) "))
             year_add_by_user = int(input("Please enter the year of release (e.g. 1994) "))
             break
-        except ValueError as e:    
+        except ValueError as e:
             print(f"No valid input. Please try again. Error {e}")
     for movie in movies.values():
         if movie_add_by_user.lower() == movie['title'].lower():
@@ -108,22 +127,25 @@ def add_movie_input():
             menu_user_input()
             return
     try:
-        movies = add_movie(movie_add_by_user,year_add_by_user,ranking_add_by_user)  
+        movies = add_movie(movie_add_by_user, year_add_by_user, ranking_add_by_user)
         print()
         print("***Movie added to database***")
         print()
-        print_menu()       
+        print_menu()
         menu_user_input()
     except FileNotFoundError as e:
-        print(f"Couldnt find storage destination. Error {e}")    
-        print_menu()       
+        print(f"Couldnt find storage destination. Error {e}")
+        print_menu()
         menu_user_input()
 
+
 def del_movie():
-    ###deleting movie from movies dictonary and movies.json###
+    """
+    Prompts the user to select a movie to delete and removes it from the database.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         return
     for index, (key, movie) in enumerate(movies.items()):
@@ -141,25 +163,28 @@ def del_movie():
     for index, (key, movie) in enumerate(movies.items()):
         if user_del_input == index + 1:
             print(f"Are you sure you want to delete >>> {title} <<< permanently?")
-            user_del_choice= input("Press 1 to proceed or any other to abort >>>")
-    if user_del_choice == "1" :
+            user_del_choice = input("Press 1 to proceed or any other to abort >>>")
+    if user_del_choice == "1":
         try:
             movies = delete_movie(title)
             print(f"{title} is deleted")
         except FileNotFoundError as e:
-            print(f"Couldnt find storage destination. Error {e}")   
+            print(f"Couldnt find storage destination. Error {e}")
     else:
         print("Deletion aborted by user")
-    print_menu()       
-    menu_user_input()    
+    print_menu()
+    menu_user_input()
     return movies
 
+
 def upd_movie():
-    ###updating movie ranking###
+    """
+    Prompts the user to select a movie to update and allows them to change its rating.
+    """
     try:
         movies = get_movies()
-    except FileNotFoundError as e:    
-        print(f"Could not load Movie Data. Error {e}") 
+    except FileNotFoundError as e:
+        print(f"Could not load Movie Data. Error {e}")
         return
     for index, (key, movie) in enumerate(movies.items()):
         title = movie.get("title", "Unknown Title")
@@ -182,21 +207,25 @@ def upd_movie():
                 new_ranking = float(input("Please enter a new ranking (1-10): "))
                 try:
                     update_movie(title, new_ranking)
-                except Exception as e:    
+                except Exception as e:
                     print(f"Could not update function {e}")
                 print()
                 print(f"New ranking saved for {title} with a ranking of {new_ranking}")
             else:
                 print("Update aborted by user.")
-            break     
+            break
     print_menu()
     menu_user_input()
+
+
    
 def stats():
-    ###providing max and min stats for movies in database###
+    """
+    Calculates and prints various statistics about the movies in the database, including average, median, best, and worst ratings.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         return
     ratings = [movie["rating"] for movie in movies.values()]
@@ -205,8 +234,8 @@ def stats():
         print_menu()
         menu_user_input()
         return
-    average_ranking = statistics.mean(ratings)
-    median = statistics.median(ratings)
+    average_ranking = round(statistics.mean(ratings), 1)
+    median = round(statistics.median(ratings), 1)
     best_ranking = max(ratings)
     lowest_ranking = min(ratings)
     print(f"The average ranking of all Movies in the database is {average_ranking}")
@@ -226,32 +255,38 @@ def stats():
     print_menu()
     menu_user_input()
 
+
 def random_movies():
-    ###display random movie###
+    """
+    Selects and prints a random movie from the database.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         return
     number_of_movies = len(movies)
-    random_number = random.randint(1,number_of_movies) 
+    random_number = random.randint(1, number_of_movies)
     for index, (title, movie) in enumerate(movies.items()):
         title = movie.get("title", "Unknown Title")
         rating = movie.get("rating", "No Rating")
         if index == random_number:
             print(f"Your random movie is *{title}* with a ranking of {rating}")
     print_menu()
-    menu_user_input()         
+    menu_user_input()
+
 
 def search_movies():
-    ###search for movie with fuzzy feature for typos###
+    """
+    Searches for movies in the database based on a user-provided search term, using fuzzy matching for potential typos.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         return
     while True:
-        try:     
+        try:
             search_user_input = input("Enter the movie name you are looking for: ").lower()
             break
         except ValueError as e:
@@ -259,7 +294,7 @@ def search_movies():
     found_data_list = {}
     fuzzy_data_list = {}
     for key, movie in movies.items():
-        title = movie.get("title", "").lower()  
+        title = movie.get("title", "").lower()
         if search_user_input in title:
             found_data_list[key] = movie
     if found_data_list:
@@ -271,7 +306,7 @@ def search_movies():
         for key, movie in movies.items():
             title = movie.get("title", "")
             if fuzz.ratio(search_user_input, title.lower()) > 35:
-                fuzzy_data_list[key] = movie 
+                fuzzy_data_list[key] = movie
         if fuzzy_data_list:
             print("Did you mean:")
             for key, movie in fuzzy_data_list.items():
@@ -279,11 +314,14 @@ def search_movies():
     print_menu()
     menu_user_input()
 
+
 def movies_sorted_rating():
-    ###moviea sorted by ranking###
+    """
+    Displays a list of movies sorted by their rating in descending order.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
         return
     sorted_ranking_list = sorted(movies.items(), key=lambda item: item[1]["rating"], reverse=True)
@@ -295,12 +333,45 @@ def movies_sorted_rating():
     print_menu()
     menu_user_input()
 
-def rating_histo():
-    ###bloody histo for movie nonsense###
-    # Extract ratings from the movie dictionaries
+
+def movies_sorted_year():
+    """
+    Displays a list of movies sorted by their year of release, in either ascending or descending order.
+    """
     try:
-        movies=get_movies()
-    except FileNotFoundError as e:    
+        movies = get_movies()
+    except FileNotFoundError as e:
+        print(f"Could not load Movie Data. Error {e}")
+        return
+    while True:
+        try:
+            order_direction = input("Press 1 for increasing or 0 for decreasing direction")
+            if order_direction == "0" or "1":
+                break
+        except ValueError as e:
+            print(f"Wrong Input. Try again! Error {e}")
+
+    if order_direction == "1":
+        sorted_ranking_list = sorted(movies.items(), key=lambda item: item[1]["year_of_release"], reverse=False)
+    elif order_direction == "0":
+        sorted_ranking_list = sorted(movies.items(), key=lambda item: item[1]["year_of_release"], reverse=True)
+
+    for key, movie in sorted_ranking_list:
+        title = movie.get("title", "Unknown Title")
+        rating = movie.get("rating", "No Rating")
+        year_of_release = movie.get("year_of_release", "Unknown Year")
+        print(f"{title} (Rating: {rating}), Year: {year_of_release}")
+    print_menu()
+    menu_user_input()
+
+
+def rating_histo():
+    """
+    Creates and displays a histogram of movie ratings, saving it to a user-specified file.
+    """
+    try:
+        movies = get_movies()
+    except FileNotFoundError as e:
         print(f"Could not load Movie Data. Error {e}")
     ratings = [movie["rating"] for movie in movies.values()]
     # Create histogram
@@ -324,14 +395,11 @@ def rating_histo():
             print(f"Plot saved successfully at {file_path}")
         # Show the plot
         plt.show()
-    except Exception as e:    
-        print(f"An unexpected Error occured. Error {e}")
+    except Exception as e:
+        print(f"An unexpected Error occurred. Error {e}")
     print_menu()
     menu_user_input()
 
 
 if __name__ == "__main__":
     main()
-
-
-
